@@ -1,7 +1,18 @@
 "use strict";
+
 let cards = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
-let drawnCards = [];
-const methods = [takeFromEnd, takeFromMid, takeFromBeg];
+
+let playedCards = [];
+
+let number = 0;
+let isGame = true;
+const cardsField = document.getElementById("cards");
+const realCardsField = document.getElementById("real_cards");
+const playedCardsField = document.getElementById("played_cards");
+const info = document.getElementById("info");
+const rel = document.getElementById("reload");
+
+info.innerHTML = "Take the card!";
 
 function shuffle(arr) {
     let rand, temp;
@@ -14,91 +25,137 @@ function shuffle(arr) {
     return arr;
 }
 
-function play(cards) {
-    // let card = "";
-    console.log(shuffle(cards));
-    aiPlay()
+shuffle(cards);
 
-    // while (cards.length > 0) {
-    //     // alert("Your turn!");
-    //     // if (showCard(card, "You won")) {
-    //     //     return;
-    //     // }
+cardsField.innerHTML = cards;
 
-    //     alert("My turn!");
-    //     let randomMethod = Math.floor(Math.random() * methods.length);
-    //     methods[randomMethod]("I won");
-    //     alert("Your turn!");
-    //     // if (showCard(card, "I won")) {
-    //     //     return;
-    //     // }
-    // }
-}
-
-function aiPlay() {
-    alert("My turn!");
-    let randomMethod = Math.floor(Math.random() * methods.length);
-    if (methods[randomMethod]("I won")) {
-        return;
-    } else {
-        alert("Your turn!");
+function allowDrop(event) {
+    if (isGame === true) {
+        event.preventDefault();
     }
 }
 
-let counter = 0;
-// function showCard(card, win) {
-//     alert((card = cards.pop()));
-//     drawnCards[counter++] = card;
-//     if (card === "Q") {
-//         alert(win);
-//         console.log(drawnCards);
-//         return true;
-//     }
-// }
+function drag(event) {
+    if (isGame === true) {
+        event.dataTransfer.setData("text", event.target.id);
+    }
+}
 
-function showCard(card, win) {
-    // alert((card = cards.pop()));
-    // drawnCards[counter++] = card;
-    alert(card);
-    drawnCards[counter++] = card;
+function drop(event) {
+    if (isGame === true) {
+        event.preventDefault();
+        let data = event.dataTransfer.getData("text");
+
+        event.target.appendChild(document.getElementById(data));
+        play(cards, data);
+    }
+}
+
+function showCards(cards) {
+    return cards.join(", ");
+}
+
+function newPlay() {
+    location.reload();
+    return false;
+}
+
+function play(cards, elId) {
+    if (!isGame) return;
+    try {
+        if (myMove(elId)) return;
+        setTimeout(computerMove, 300);
+    } catch (ex) {
+        info.innerHTML = ex.message;
+    }
+}
+
+function removeCard(number) {
+    playedCards.push(cards[number]);
+    cards.splice(number, 1);
+    cardsField.innerHTML = cards;
+    generateCards(cards, realCardsField, "", "notUsedCard");
+    generateCards(playedCards, playedCardsField, "p", "usedCard");
+    addEventCardList();
+}
+
+const checkWin = (player, card) => {
+    console.log(card);
     if (card === "Q") {
-        alert(win);
-        console.log(drawnCards);
-        return true;
+        info.textContent = `${player} won!`;
     }
-    else if (win === "You won") {
-        aiPlay();
+    return card === "Q";
+}
+
+const animateCards = () => {
+    const allCards = document.querySelectorAll('.card');
+    allCards.forEach(cardEl => {
+        cardEl.classList.add('rotate');
+        cardEl.classList.add('effect');
+        cardEl.classList.add('move');
+    });
+}
+
+function myMove(elId) {
+    console.log(isGame);
+    if (isGame === true) {
+        isGame = false;
+        let b = false;
+        number = Number(elId.substr(3));
+        if (number > cards.length || number < 0) {
+            throw new Error("Input error! Try again!");
+        }
+        if (checkWin("You", cards[number])) {
+            b = true;
+            setTimeout(removeCard.bind(this, number), 200);
+            setTimeout(animateCards, 1000);
+        } else {
+            setTimeout(removeCard.bind(null, number), 200);
+            isGame = true;
+        }
+        return b;
     }
 }
 
-function start() {
-    play(cards);
+function computerMove() {
+    if (isGame === true) {
+        isGame = false;
+        let b = false;
+        number = Math.floor(Math.random() * cards.length);
+
+        console.log(number);
+
+        let computerCard = document.getElementById(`rc_${number}`);
+        console.log(computerCard.id);
+
+        if (checkWin("I", cards[number])) {
+            b = true;
+            setTimeout(removeCard.bind(this, number), 200);
+            setTimeout(animateCards, 1000);
+        } else {
+            isGame = true;
+            setTimeout(removeCard.bind(this, number), 200);
+        }
+        return b;
+    }
 }
 
-function takeFromEnd(win = "You won") {
-    let card = cards.pop()
-    // alert(card);
-    // drawnCards[counter++] = card;
-    return showCard(card, win);
+function generateCards(cards, cardsF, s, bgClass) {
+    cardsF.innerHTML = "";
+    for (let i = 0; i < cards.length; i++) {
+        cardsF.innerHTML += `<div id="rc_${i}${s}" class="card ${bgClass}" draggable="true" ondragstart="drag(event)"><span>${cards[i]}</span></div>`;
+    }
 }
 
-function takeFromMid(win = "You won") {
-    let card = cards.splice(Math.round(cards.length / 2), 1)
-    // alert(card);
-    // drawnCards[counter++] = card;
-    return showCard(card, win);
+function addEventCardList() {
+    let card_elements = document.getElementsByClassName("card");
+    for (let i = 0; i < card_elements.length; i++) {
+        card_elements[i].addEventListener("click", play);
+    }
 }
 
-function takeFromBeg(win = "You won") {
-    let card = cards.shift()
-    // alert(card);
-    // drawnCards[counter++] = card;
-    return showCard(card, win);
-}
-
-// const fruits = ["Banana"];
-
-// // At position 2, remove 2 items:
-// fruits.splice(Math.round(fruits.length / 2), 1);
-
-// document.getElementById("demo").innerHTML = fruits;
+window.onload = function () {
+    generateCards(cards, realCardsField, "", "notUsedCard");
+    addEventCardList();
+    rel.addEventListener("click", newPlay);
+};

@@ -1,0 +1,88 @@
+.card {
+  position: relative;
+  display: inline-block;
+  top: 0;
+  left: 0;
+  width: 80px;
+  height: 120px;
+  padding: 20px;
+  margin: 10px;
+  box-sizing: border-box;
+  text-align: center;
+  font-size: 40px;
+  color: red;
+  transition: all 1s;
+}
+
+.notUsedCard {
+  background-image: linear-gradient(45deg, black 25%, transparent 25%, transparent 75%, black 75%, black),
+    linear-gradient(-45deg, black 25%, transparent 25%, transparent 75%, black 75%, black);
+  background-color: #6d695c !important;
+  background-size: 15px 15px;
+}
+
+.usedCard {
+  background-color: #ffffffe4;
+}
+
+#real_cards,
+#played_cards {
+  min-height: 300px;
+  z-index: 2;
+}
+
+#real_cards {
+  background-color: #6d695c;
+  background-color: orange !important;
+}
+
+#real_cards span {
+  display: none;
+}
+
+#played_cards {
+  border: 1px solid green;
+  background-color: green;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.effect {
+  opacity: 0;
+  transition: all 1s;
+  transform: translateY(100%);
+}
+
+.move {
+  top: 280px;
+  transition: all 0.2s;
+}
+
+.rotate {
+  transition: all 3s ease;
+  opacity: 0;
+  transform: translate(500px, 800px) rotate(3600deg);
+}
+
+#win {
+  position: absolute;
+  display: none;
+  width: 40%;
+  top: 20%;
+  left: 30%;
+  height: 60%;
+  background-color: gold;
+  color: red;
+  text-align: center;
+  font-size: 60px;
+  z-index: 9999;
+  opacity: 0;
+  box-sizing: border-box;
+  padding-top: 10%;
+  border: 2px solid red;
+  transition: all 3s;
+}
+
+#wrap {
+  overflow: hidden;
+}
